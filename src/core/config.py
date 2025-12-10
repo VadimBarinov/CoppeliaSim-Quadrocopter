@@ -1,4 +1,6 @@
 from pathlib import Path
+
+import numpy as np
 from pydantic import BaseModel
 from pydantic_settings import (
     BaseSettings,
@@ -21,7 +23,8 @@ class SceneMapConfig(BaseModel):
 
 
 class QuadrocopterConfig(BaseModel):
-    ref_object: int = 23
+    # красный цвет
+    ref_object: list = [255, 0, 0]
 
     v_start: float = 0.1
     v_min: float = 0.1

@@ -1,5 +1,5 @@
 import time
-from typing import Any
+import numpy as np
 
 from src.core.config import settings
 from src.util import (
@@ -9,7 +9,6 @@ from src.util import (
 
 
 class VisionSensor:
-    resolution: int | None = None
     line: int | None = None
     half: int | None = None
 
@@ -32,85 +31,71 @@ class VisionSensor:
 
         time.sleep(0.5)
 
-    def get_image(self) -> Any:
-        if not self.resolution:
-            error, res, image = sim.simxGetVisionSensorImage(
-                clientID=self.client_id,
-                sensorHandle=self.id,
-                options=0,
-                operationMode=simConst.simx_opmode_buffer,
-            )
-            self.resolution = res[0]
-            self.line = self.resolution * 3
-            self.half = self.line * self.resolution // 2
-
-            return image
-
-        return sim.simxGetVisionSensorImage(
+    def get_image(self) -> np.ndarray:
+        error, res, image = sim.simxGetVisionSensorImage(
             clientID=self.client_id,
             sensorHandle=self.id,
             options=0,
-            operationMode=simConst.simx_opmode_buffer
-        )[2]
+            operationMode=simConst.simx_opmode_buffer,
+        )
+
+        if not self.line:
+            self.line = res[0]
+            self.half = res[0] * res[1] // 2
+
+        image = np.array(image).astype(np.uint8).reshape(-1, 3)
+        return image
 
     def get_position_object(
             self,
-            image: Any,
-            ref_object: int,
+            image: np.ndarray,
+            ref_object: np.ndarray,
             v: float = settings.quadrocopter.v_vision_sensor,
     ) -> list:
-        front = image[self.half:]
-        back = image[:self.half]
+        front = image[self.half:].copy()
+        back = image[:self.half].copy()
         control = 0
         orientation = None
-        searched = 0
-        if ref_object in front:
-            control = 0
-            orientation = v
-            while True:
-                control += 1
-                valor = front.pop()
-                if ref_object == valor:
-                    searched += 1
-                    if searched >= 3:
+        if np.size(front) > 0:
+            if np.any(np.all(front == ref_object, axis=1)):
+                control = 0
+                orientation = v
+                while True:
+                    control += 1
+                    valor = front[-1, :].copy()
+                    front = np.delete(front, -1, axis=0)
+                    if np.array_equal(ref_object, valor):
                         break
-                else:
-                    searched = 0
 
-                if control == self.line:
-                    control = 0
-                    searched = 0
+                    if control == self.line:
+                        control = 0
 
-                if len(front) == 0:
-                    control = 0
-                    searched = 0
-                    break
-
-        if ref_object in back:
-            control = 0
-            orientation = -v if not orientation else 0
-            while True:
-                control += 1
-                valor = back.pop()
-                if ref_object == valor:
-                    searched += 1
-                    if searched >= 3:
+                    if np.size(front) == 0:
+                        control = 0
                         break
-                else:
-                    searched = 0
 
-                if control == self.line:
-                    control = 0
-                    searched = 0
+        if np.size(back) > 0:
+            if np.any(np.all(back == ref_object, axis=1)):
+                control = 0
+                orientation = -v if not orientation else 0
+                while True:
+                    control += 1
+                    valor = back[-1, :].copy()
+                    back = np.delete(back, -1, axis=0)
+                    if np.array_equal(ref_object, valor):
+                        break
 
-                if len(back) == 0:
-                    control = 0
-                    searched = 0
-                    break
+                    if control == self.line:
+                        control = 0
 
-        if control == 0:
+                    if np.size(back) == 0:
+                        control = 0
+                        break
+
+
+        if control < 1:
             return [-1, -1]
-        elif ((self.line / 2) - 4) <= control <= self.line / 2:
+        elif ((self.line / 2) - 1) <= control <= self.line / 2:
             return [orientation, 0]
         elif control <= self.line / 2:
             return [orientation, -v]

@@ -1,5 +1,7 @@
 import time
 
+import numpy as np
+
 from src.quadrocopter.sonar_sensor import SonarSensor
 from src.quadrocopter.target_control import TargetControl
 from src.quadrocopter.vision_sensor import VisionSensor
@@ -14,14 +16,14 @@ class Quadrocopter:
 
     def __init__(
             self,
-            ref_object: int = settings.quadrocopter.ref_object,
+            ref_object: list = settings.quadrocopter.ref_object,
             server_host: str = settings.app.host,
             server_port: int = settings.app.port,
             v_min: float = settings.quadrocopter.v_min,
     ) -> None:
         self.server_host = server_host
         self.server_port = server_port
-        self.ref_object = ref_object
+        self.ref_object = np.array(ref_object, dtype=np.uint8)
         self.v_min = v_min
 
         self.client_id = self._start_server()
@@ -86,8 +88,9 @@ class Quadrocopter:
             time.sleep(0.05)
             
             image = self.vision.get_image()
-            if self.ref_object in image:
+            if np.any(np.all(image == self.ref_object, axis=1)):
                 self.obj_found = True
+                print("\nОбъект зафиксирован, снижаюсь.")
                 break
             
             pos = self.target.get_position()
@@ -136,10 +139,12 @@ class Quadrocopter:
             time.sleep(0.1)
 
             image = self.vision.get_image()
-            if self.ref_object in image:
+            if np.any(np.all(image == self.ref_object, axis=1)):
                 self.obj_found = True
-                self.v_min = self.v_min/10
+                self.v_min = self.v_min / 10
+                print("\nОбъект зафиксирован, снижаюсь.")
                 return
+
         self.obj_found = False
         self.msg = "\nОбъект не найден."
 
