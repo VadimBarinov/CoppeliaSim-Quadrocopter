@@ -28,6 +28,8 @@ class QuadrocopterConfig(BaseModel):
     v_min: float = 0.1
     v_vision_sensor: float = 0.02
 
+    y_step: float = 0.1
+
 
 class AppConfig(BaseModel):
     host: str
