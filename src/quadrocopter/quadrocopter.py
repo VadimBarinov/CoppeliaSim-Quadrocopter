@@ -98,7 +98,7 @@ class Quadrocopter:
     def search_object(
             self,
             scene_map: settings.scene_map.__class__,
-            y_step = settings.quadrocopter.y_step,
+            y_step: float = settings.quadrocopter.y_step,
     ) -> None:
         y_control = 0
         x_enable = True
