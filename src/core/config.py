@@ -1,6 +1,4 @@
 from pathlib import Path
-
-import numpy as np
 from pydantic import BaseModel
 from pydantic_settings import (
     BaseSettings,

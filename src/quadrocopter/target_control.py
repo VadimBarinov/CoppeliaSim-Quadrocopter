@@ -27,7 +27,7 @@ class TargetControl:
 
         time.sleep(0.5)
 
-    def get_position(self):
+    def get_position(self) -> list:
         return sim.simxGetObjectPosition(
             clientID = self.client_id,
             objectHandle = self.id,
@@ -35,7 +35,7 @@ class TargetControl:
             operationMode = simConst.simx_opmode_buffer,
         )[1]
 
-    def set_position(self, x, y, z):
+    def set_position(self, x, y, z) -> None:
         sim.simxSetObjectPosition(
             clientID=self.client_id,
             objectHandle=self.id,
