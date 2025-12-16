@@ -5,8 +5,6 @@ import numpy as np
 from src.quadrocopter.sonar_sensor import SonarSensor
 from src.quadrocopter.target_control import TargetControl
 from src.quadrocopter.vision_sensor import VisionSensor
-
-from src.util import sim
 from src.core.config import settings
 
 
@@ -26,40 +24,9 @@ class Quadrocopter:
         self.ref_object = np.array(ref_object, dtype=np.uint8)
         self.v_min = v_min
 
-        self.client_id = self._start_server()
-        self.target = self._create_target_control()
-        self.vision = self._create_vision_sensor()
-        self.sonar = self._create_sonar_sensor()
-
-    def _start_server(self) -> int:
-        return sim.simxStart(
-            connectionAddress=self.server_host,
-            connectionPort=self.server_port,
-            waitUntilConnected=True,
-            doNotReconnectOnceDisconnected=True,
-            timeOutInMs=2000,
-            commThreadCycleInMs=5,
-        )
-
-    def _create_target_control(self) -> TargetControl:
-        return TargetControl(
-            client_id=self.client_id,
-        )
-
-    def _create_vision_sensor(self) -> VisionSensor:
-        return VisionSensor(
-            client_id=self.client_id,
-        )
-
-    def _create_sonar_sensor(self) -> SonarSensor:
-        return SonarSensor(
-            client_id=self.client_id,
-        )
-
-    def _finish_server(self) -> None:
-        sim.simxFinish(
-            client_id=self.client_id,
-        )
+        self.target = TargetControl()
+        self.vision = VisionSensor()
+        self.sonar = SonarSensor()
 
     def start_position(
             self,
@@ -104,7 +71,7 @@ class Quadrocopter:
         x_enable = True
         y_enable = False
         boss = False
-        while sim.simxGetConnectionId(self.client_id) != -1:
+        while True:
             x, y, z = self.target.get_position()
             if x >= scene_map.x_min and y >= scene_map.y_max:
                 break 

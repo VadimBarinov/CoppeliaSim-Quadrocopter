@@ -1,13 +1,15 @@
 from src.quadrocopter.quadrocopter import Quadrocopter
 from src.core.config import settings
+from src.core.sim_helper import sim
 
 
 def main():
     scene_map = settings.scene_map
     quadrocopter = Quadrocopter()
 
-    if quadrocopter.client_id != -1:
-        print("\nСоединение с сервером установлено!")
+    try:
+        sim.startSimulation()
+        print("\nСоединение с сервером установлено, симуляция запущена!")
         quadrocopter.start_position(
             v_start=settings.quadrocopter.v_start,
             scene_map=scene_map,
@@ -23,8 +25,8 @@ def main():
                 print(quadrocopter.msg)
         else:
             print(quadrocopter.msg)
-    else:
-        print("\nНе удалось подключиться к серверу. Сервер отключен.")
+    except:
+        print("\nНе удалось подключиться к серверу.")
 
 
 if __name__ == "__main__":

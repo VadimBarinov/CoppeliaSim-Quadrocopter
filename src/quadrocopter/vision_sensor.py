@@ -2,48 +2,27 @@ import time
 import numpy as np
 
 from src.core.config import settings
-from src.util import (
-    sim,
-    simConst,
-)
+from src.core.sim_helper import sim
 
 
 class VisionSensor:
     line: int | None = None
     half: int | None = None
 
-    def __init__(
-            self,
-            client_id: int,
-    ) -> None:
-        self.client_id = client_id
-        self.id = sim.simxGetObjectHandle(
-            clientID=client_id,
-            objectName=settings.vision_sensor_name,
-            operationMode=simConst.simx_opmode_blocking
-        )[1]
-        sim.simxGetVisionSensorImage(
-            clientID=client_id,
-            sensorHandle=self.id,
-            options=0,
-            operationMode=simConst.simx_opmode_streaming,
-        )
+    def __init__(self) -> None:
+        self.id = sim.getObjectHandle(settings.vision_sensor_name)
+        sim.getVisionSensorImg(self.id)
 
         time.sleep(0.5)
 
     def get_image(self) -> np.ndarray:
-        error, res, image = sim.simxGetVisionSensorImage(
-            clientID=self.client_id,
-            sensorHandle=self.id,
-            options=0,
-            operationMode=simConst.simx_opmode_buffer,
-        )
+        image, res = sim.getVisionSensorImg(self.id)
 
         if not self.line:
             self.line = res[0]
             self.half = res[0] * res[1] // 2
 
-        image = np.array(image).astype(np.uint8).reshape(-1, 3)
+        image = np.frombuffer(image, dtype=np.uint8).reshape(-1, 3)
         return image
 
     def get_position_object(

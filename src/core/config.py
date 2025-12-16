@@ -47,9 +47,9 @@ class Settings(BaseSettings):
     scene_map: SceneMapConfig = SceneMapConfig()
     quadrocopter: QuadrocopterConfig = QuadrocopterConfig()
 
-    target_name: str = "Quadrocopter_target"
-    sonar_sensor_name: str = "Proximity_sensor"
-    vision_sensor_name: str = "Vision_sensor"
+    target_name: str = "/Quadrocopter_target"
+    sonar_sensor_name: str = "/Quadrocopter/Proximity_sensor"
+    vision_sensor_name: str = "/Quadrocopter/Vision_sensor"
 
 
 settings = Settings()
