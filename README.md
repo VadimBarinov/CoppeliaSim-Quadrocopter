@@ -21,7 +21,7 @@ git clone https://github.com/VadimBarinov/CoppeliaSim-Quadrocopter.git
 cd CoppeliaSim-Quadrocopter
 ```
 
-2. Запустить сцену `/schene/challenge_scenario.ttt` в CoppeliaSim
+2. Открыть сцену `/schene/challenge_scenario.ttt` в CoppeliaSim
 
 3. Загрузить необходимые библиотеки
 ```bash
