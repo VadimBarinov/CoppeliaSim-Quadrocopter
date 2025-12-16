@@ -26,7 +26,7 @@ def main():
         else:
             print(quadrocopter.msg)
     except:
-        print("\nНе удалось подключиться к серверу.")
+        print("\nПроизошла ошибка.")
 
 
 if __name__ == "__main__":
