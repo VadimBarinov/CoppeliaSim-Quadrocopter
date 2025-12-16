@@ -3,7 +3,7 @@
 
 ---
 
-- Используется Legacy RemoteAPI для взаимодействия с CoppeliaSim
+- Используется ZeroMQ RemoteAPI для взаимодействия с CoppeliaSim
 - Основной код написан на Python
 - `/schene/challenge_scenario.ttt` файл со сценой для CoppeliaSim
 
